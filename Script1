@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#SOLUCIÓN 
+#Primero se busco el disco duro de la maquina virtual en esta ubicación C:\Users\User\VirtualBox VMs\demo. En mi caso era un disco .vmdk por consiguiente se procedio a convertirlo en el formato .vdi, para ello hay dos formas de hacerlo:
+
+#POR CONSOLA
+#- Hacer una copia del archivo.vmdk en otra carpeta
+#- Ingrese al símbolo del sistema y ubicarse en la carpeta donde esta la copia del archivo .vmdk
+#- Escribir el siguiente comando en el símbolo del sistema. Incluya las comillas. Reemplace "original" con el nombre del disco virtual que está convirtiendo. 
+# C:\Program Files\Oracle\VirtualBox\Vboxmanage clonehd original.vmdk new.vdi format VDI
+
+#POR LAHERRAMIENTA DE VIRTUALBOX
+#Se ingresa a Archivo -> Administrador de medios virtuales
+#Selecciona el disco y luego el icono copiar
+#Se siguen las instrucciones y se crea una copia del archivo pero en formado .vdi.
+#* La copia del disco new.vdi queda en C:\Users\User\VirtualBox VMs\demo.
+
+#CREAR MAQUINA VIRTUAL
+#Se ingresa al símbolo del sistema como Administrador 
+#Se ingresa al directorio donde se encuentra VBoxManage
+#cd C:\Program Files\Oracle\VirtualBox
+#No es necesario crear un disco -- VBoxManage createhd --filename demito.vdi --size 32768
+#Se miran la lista de tipos de SO  VBoxManage list ostypes
+
+#Se crean las variables
+VM='Ubuntu'
+vdi_file=/home/user/Desktop/demo-disk1_copiado.vdi
+
+#Crear VM (nombre demito y tipo Ubuntu_64)
+VBoxManage createvm --name $VM --ostype "Ubuntu_64" --register
+
+#Se añade el controlador SATA
+VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
+
+#Se añade la copia del disco extraido de la otro VM
+VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0  --device 0 --type hdd --medium $vdi_file
+
+#Añadir Memoria  
+VBoxManage modifyvm $VM --memory 1024 --vram 128
+VBoxManage modifyvm $VM --ioapic on
+VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
+
+#Mostrar configuración 
+#VM vboxmanage showvminfo demito
+
+#Iniciar la máquina virtual
+#VBoxManage startvm $VM
+
+
