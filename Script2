@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+#scrip con tres variable
+#$1=nombre de la maquina
+#$2=memoria ram
+#$3=tipo SO
+
+#Se crean las variables
+VM=$1
+MEM=$2
+TYOS=$3
+
+vdi_file=/home/user/Desktop/demo-disk1_copiado.vdi
+#Crear VM (nombre demito y tipo Ubuntu_64)
+VBoxManage createvm --name $VM --ostype $TYOS --register
+
+#Se añade el controlador SATA
+VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
+
+#Se añade la copia del disco extraido de la otro VM
+VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0  --device 0 --type hdd --medium $vdi_file
+
+#Mostrar configuración 
+#VM vboxmanage showvminfo demito
+
+
+VBoxManage modifyvm $VM --ioapic on
+VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
+
+#Añadir Memoria  
+VBoxManage modifyvm $VM --memory $MEM --vram 128
+
+#Iniciar la máquina virtual
+#VBoxManage startvm $VM
