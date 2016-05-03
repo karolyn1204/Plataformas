@@ -31,4 +31,4 @@ VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
 VBoxManage modifyvm $VM --memory $MEM --vram 128
 
 #Iniciar la máquina virtual
-#VBoxManage startvm $VM
+#VBoxManage startvm $VM 
