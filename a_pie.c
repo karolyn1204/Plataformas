@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <time.h>
 
+#define MAX 100
 
 int main(int argc, char** argv) {
 
