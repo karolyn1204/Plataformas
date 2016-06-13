@@ -27,7 +27,7 @@ main(int argc, char *argv[])  {
                 scounts[i] =(SIZE/numtasks);
         }
 
-        MPI_Scatterv(a,scounts,disp,MPI_INT,b,SIZE/numtasks,MPI_INT,0,MPI_COMM_$
+        MPI_Scatterv(a,scounts,disp,MPI_INT,b,SIZE/numtasks,MPI_INT,0,MPI_COMM_WORLD);
 
         acum = 0;
         for (i = 0; i < (SIZE/numtasks); i++)  acum += b[i];
