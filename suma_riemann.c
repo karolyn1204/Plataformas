@@ -45,20 +45,21 @@ void* calcular(void *arg) {
 }
 */
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     	
 		
     	base_length = length/MAXRECT;
 		
     	int numtasks, rank, source=0, dest, tag=1, i;
         
-		MPI_Status stat;
+	MPI_Status stat;
         MPI_Datatype rowtype;
         MPI_Init(&argc,&argv);
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
         MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 		
-		//pthread_t threads[MAXTHREAD];
+	//pthread_t threads[MAXTHREAD];
     	//long taskids[MAXTHREAD];
 
         int taskids[numtasks], taman [numtasks];
@@ -66,8 +67,7 @@ int main(int argc, char** argv) {
         double numRectxThread = (double)(MAXRECT/numtasks);
       		
 		
-		/*printf("base length: %lf numRectxThread: %lf\n",base_length, numRectxThread);
-		
+	/*printf("base length: %lf numRectxThread: %lf\n",base_length, numRectxThread);
     	for (int i = 0; i < MAXTHREAD; i++) {
             	taskids[i] = i;
             	partialSums[i] = 0;
@@ -81,30 +81,30 @@ int main(int argc, char** argv) {
     	pthread_exit(NULL);*/		
 		
 		
-		for ( i= 0; i < numtasks; i++) 
-		{
-				taman[i]=1;
+	for ( i= 0; i < numtasks; i++) 
+	{
+		taman[i]=1;
                 taskids[i] = i;
                 lowlimit[i]= i*base_length*numRectxThread;
         }
         
         MPI_Scatterv(lowlimit,taman,taskids,MPI_FLOAT,riem,1,MPI_FLOAT,0,MPI_COMM_WORLD);	
         
-		double otro = riem[0];
+	double otro = riem[0];
         float sum = 0;
-		int j; 	
+	int j; 	
         
-		for (j = 0; j < numRectxThread; j++) 
-		{
+	for (j = 0; j < numRectxThread; j++) 
+	{
             sum += function(otro + j*base_length) * base_length;
         }
 		
         printf("Subtotal %f en nodo %d \n", sum, rank);
         
-		MPI_Reduce(&sum,riem,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
+	MPI_Reduce(&sum,riem,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
         
-		if (rank == 0) printf("TOTAL: %lf\n",riem[0]);
+	if (rank == 0) printf("TOTAL: %lf\n",riem[0]);
         
-		MPI_Finalize();
+        MPI_Finalize();
 		
 }
