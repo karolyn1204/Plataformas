@@ -1,69 +1,110 @@
+/**
+* FILE: riemann_erroneo.c
+* DESCRIPTION:
+*   	Implementacion de la suma de Riemann para calcular el area bajo la
+*   	curva.
+* AUTHOR: John Sanabria - john.sanabria@correounivalle.edu.co
+* LAST REVISED: 14/04/16
+* REFERENCES: http://mathinsight.org/calculating_area_under_curve_riemann_sums
+******************************************************************************/
+
 #include <stdio.h>
-#include <stdlib.h>
 #include "mpi.h"
+#include <pthread.h>
+#include <math.h>
 
-#define XINICIAL 0
-#define XFINAL 10
-#define PASOS 100
-#define MASTER 0
-#define TAG_X 1
-#define TAG_RESULT_PARCIAL 2
+#define MAXRECT 100
+#define BASE 0.0
+#define LIMIT 10.0
+//#define MAXTHREAD 10
 
-float calcularFuncion(float x);
+double length = LIMIT - BASE;
+double base_length = 0;
+//double numRectxThread = (double)(MAXRECT/MAXTHREAD);
+//double sumTotal = 0;
+//double partialSums[MAXTHREAD];
 
-int main (int argc, char *argv[])
+double function(double x) 
 {
-      int rank, value, size, dest,i,workers;  
-      float resultado,incremento,x,resultParcial;
-
-      MPI_Status status; 
-
-      incremento = ((float)XFINAL-(float)XINICIAL)/(float)PASOS;
-
-      MPI_Init( &argc, &argv );
-
-      MPI_Comm_rank( MPI_COMM_WORLD, &rank );
-      MPI_Comm_size( MPI_COMM_WORLD, &size ); 
-
-      workers=size-1;
-
-      if (size<2)
-      {
-            printf("No se puede procesar con %i nodos\n",size);
-            return 0;
-      }
-
-      if (rank==MASTER)
-      {
-            dest=1;
-            x=XINICIAL;
-            for (i=0;i<PASOS;i++)
-            {
-                  MPI_Send(&x, 1, MPI_FLOAT, dest, TAG_X, MPI_COMM_WORLD); 
-                  dest++;
-                  if (dest==size) dest=1;
-                  x+=incremento;
-            }
-            
-            for (i=MASTER+1;i<size;i++)
-            {
-                  MPI_Recv(&resultParcial, 1, MPI_FLOAT, i, TAG_RESULT_PARCIAL, MPI_COMM_WORLD, &status); 
-                  resultado +=resultParcial;
-            }
-      printf("El resultado de es %f \n",resultado);
-            
-      }
-      
-      else
-      {
-            for (i=0; i<PASOS-(((int)(PASOS/workers))*workers)>=rank? (int)(PASOS/workers)+1: (int)(PASOS/workers); i++) 
-            {
-            MPI_Recv(&x, 1, MPI_FLOAT, MASTER, TAG_X, MPI_COMM_WORLD, &status); 
-            resultParcial += incremento * (calcularFuncion(x)+ calcularFuncion(x+incremento))/(float)2;
-                  
-            }
-      MPI_Send(&resultParcial,1, MPI_FLOAT, MASTER, TAG_RESULT_PARCIAL, MPI_COMM_WORLD);
-      }      
+    	return x * x;
 }
 
-float calcularFuncion(float x) {  return x*x; }
+/*
+void* calcular(void *arg) {
+    	long id = (long) arg;
+    	double lowlimit = id*base_length*numRectxThread;
+
+    	double sum = 0;
+
+    	for (int i = 0; i < numRectxThread; i++) {
+            	sum += function(lowlimit + i*base_length) * base_length;
+    	}
+    	partialSums[id] = sum;
+    	printf("sum: %lf\n", sum);
+    	return 0;
+}
+*/
+
+int main(int argc, char** argv) {
+    	
+		
+    	base_length = length/MAXRECT;
+		
+    	int numtasks, rank, source=0, dest, tag=1, i;
+        
+		MPI_Status stat;
+        MPI_Datatype rowtype;
+        MPI_Init(&argc,&argv);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+		
+		//pthread_t threads[MAXTHREAD];
+    	//long taskids[MAXTHREAD];
+
+        int taskids[numtasks], taman [numtasks];
+        float lowlimit [numtasks], riem[1];
+        double numRectxThread = (double)(MAXRECT/numtasks);
+      		
+		
+		/*printf("base length: %lf numRectxThread: %lf\n",base_length, numRectxThread);
+		
+    	for (int i = 0; i < MAXTHREAD; i++) {
+            	taskids[i] = i;
+            	partialSums[i] = 0;
+            	pthread_create(&threads[i], NULL, calcular, (void*)taskids[i]);
+    	}
+    	for (int i = 0; i < MAXTHREAD; i++) {
+            	pthread_join(threads[i], NULL);
+            	sumTotal += partialSums[i];
+    	}
+    	printf("Suma total %lf\n",sumTotal);
+    	pthread_exit(NULL);*/		
+		
+		
+		for ( i= 0; i < numtasks; i++) 
+		{
+				taman[i]=1;
+                taskids[i] = i;
+                lowlimit[i]= i*base_length*numRectxThread;
+        }
+        
+        MPI_Scatterv(lowlimit,taman,taskids,MPI_FLOAT,riem,1,MPI_FLOAT,0,MPI_COMM_WORLD);	
+        
+		double otro = riem[0];
+        float sum = 0;
+		int j; 	
+        
+		for (j = 0; j < numRectxThread; j++) 
+		{
+            sum += function(otro + j*base_length) * base_length;
+        }
+		
+        printf("Subtotal %f en nodo %d \n", sum, rank);
+        
+		MPI_Reduce(&sum,riem,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
+        
+		if (rank == 0) printf("TOTAL: %lf\n",riem[0]);
+        
+		MPI_Finalize();
+		
+}
