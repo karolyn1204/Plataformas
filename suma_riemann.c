@@ -1,8 +1,6 @@
 /**
 * FILE: riemann_erroneo.c
-* DESCRIPTION:
-*   	Implementacion de la suma de Riemann para calcular el area bajo la
-*   	curva.
+* DESCRIPTION:	Implementacion de la suma de Riemann para calcular el area bajo la curva.
 * AUTHOR: John Sanabria - john.sanabria@correounivalle.edu.co
 * LAST REVISED: 14/04/16
 * REFERENCES: http://mathinsight.org/calculating_area_under_curve_riemann_sums
@@ -24,31 +22,25 @@ double base_length = 0;
 //double sumTotal = 0;
 //double partialSums[MAXTHREAD];
 
-double function(double x) 
-{
-    	return x * x;
-}
+double function(double x) {    	return x * x;    }
 
-/*
-void* calcular(void *arg) {
+/*void* calcular(void *arg) {
     	long id = (long) arg;
     	double lowlimit = id*base_length*numRectxThread;
-
     	double sum = 0;
-
-    	for (int i = 0; i < numRectxThread; i++) {
-            	sum += function(lowlimit + i*base_length) * base_length;
+    	for (int i = 0; i < numRectxThread; i++) 
+    	{
+            	sum += function(lowlimit + i*base_length) * base_length;	
+    		
     	}
     	partialSums[id] = sum;
     	printf("sum: %lf\n", sum);
     	return 0;
-}
-*/
+}*/
+
 
 int main(int argc, char** argv) 
 {
-    	
-		
     	base_length = length/MAXRECT;
 		
     	int numtasks, rank, source=0, dest, tag=1, i;
