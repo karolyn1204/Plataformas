@@ -68,14 +68,14 @@ public static Text maxWord2=new Text();
                     ) throws IOException, InterruptedException {
       StringTokenizer itr = new StringTokenizer(value.toString(),"/t");
         
-        
-        if(maxWord.equals.(word.set(itr.nextToken()))){
+        word.set(itr.nextToken());
+        if(maxWord.equals(word)){
           
         for (int i=0; i<4;i++){	 word.set(itr.nextToken()); }
 		    context.write(word, one);
         }
-
-        context.write(new Text(year), new IntWritable(avgprice));
+	else{
+        context.write(new Text(year), new IntWritable(avgprice));}
 
     }
   }
@@ -100,9 +100,9 @@ public static Text maxWord2=new Text();
       maxWord2.set(key);
        }
 }
-}
 
-protected void cleanup(Context context) throws IOException, InterruptedException{
+
+protected void cleanup1(Context context) throws IOException, InterruptedException{
     context.write(maxWord2, new IntWritable(max));
 }
 }
