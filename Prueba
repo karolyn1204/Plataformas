@@ -1,0 +1,35 @@
+mapper.py
+
+#!/usr/bin/env python
+
+import sys
+
+# input comes from STDIN (standard input)
+for line in sys.stdin:
+    line = line.strip()
+    words = line.split()
+    for word in words:
+        print '%s\t%s' % (word, 1)
+        
+        
+reducer.py
+
+#!/usr/bin/env python
+
+from operator import itemgetter
+import sys
+
+word2count = {}
+for line in sys.stdin:
+    line = line.strip()
+
+    word, count = line.split('\t', 1)
+    try:
+        count = int(count)
+        word2count[word] = word2count.get(word, 0) + count
+    except ValueError:
+        pass
+
+sorted_word2count = sorted(word2count.items(), key=itemgetter(0))
+for word, count in sorted_word2count:
+    print '%s\t%s'% (word, count)
