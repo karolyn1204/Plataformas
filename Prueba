@@ -8,9 +8,12 @@ import sys
 for line in sys.stdin:
     line = line.strip()
     words = line.split()
+    otro =0
     for word in words:
-        print '%s\t%s' % (word, 1)
-        
+		if (otro==0):
+			print '%s\t%s' % (word, 1)
+		otro = otro + 1
+
         
 reducer.py
 
@@ -30,6 +33,9 @@ for line in sys.stdin:
     except ValueError:
         pass
 
-sorted_word2count = sorted(word2count.items(), key=itemgetter(0))
+sorted_word2count = sorted(word2count.items(), key=itemgetter(1),reverse=True)
+otro =0
 for word, count in sorted_word2count:
-    print '%s\t%s'% (word, count)
+	if (otro ==0):
+		print '%s\t%s'% (word, count)
+	otro = otro + 1	
